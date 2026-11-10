@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carta das Marés</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Nothing+You+Could+Do&display=swap">
+<style>
+/* Layout: noite no mar — envelope lacrado no centro, ondas vivas embaixo, a carta sobe da maré ao abrir */
+:root{
+  --mar:#0d2235; --mar-fundo:#081626; --espuma:#cfe6ee; --areia:#f3e6cf; --papel:#fbf4e6;
+  --tinta:#2b2a3a; --tinta-suave:#6a6474; --coral:#d9604c; --coral-escuro:#a83f30; --lua:#f6e7b8;
+  --f-display:"Fraunces", Georgia, serif;
+  --f-texto:"Newsreader", Georgia, "Times New Roman", serif;
+  --f-mao:"Nothing You Could Do", "Segoe Script", cursive;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%; margin:0}
+body{
+  background:radial-gradient(120% 80% at 50% 0%, #17344d 0%, var(--mar) 45%, var(--mar-fundo) 100%) fixed;
+  background-color:var(--mar-fundo);
+  color:var(--espuma); font-family:var(--f-texto); font-size:18px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  overflow-x:hidden;
+}
+#ceu,#ondas{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:0}
+main{position:relative; z-index:2; max-width:640px; margin:0 auto; padding-block:48px 160px; display:flex; flex-direction:column; align-items:center; gap:40px}
+
+/* ---------- Abertura ---------- */
+.abertura{text-align:center; display:flex; flex-direction:column; gap:10px; align-items:center}
+.abertura .sobre{font-family:var(--f-mao); color:var(--lua); font-size:1.25rem; letter-spacing:.02em}
+.abertura h1{font-family:var(--f-display); font-weight:300; font-size:clamp(2.2rem, 8vw, 3.6rem); line-height:1.05; margin:0; text-wrap:balance; color:var(--areia)}
+.abertura h1 em{font-style:italic; font-weight:400; color:var(--lua)}
+
+/* ---------- Envelope ---------- */
+.envelope-wrap{display:flex; flex-direction:column; align-items:center; gap:18px}
+.envelope{
+  position:relative; width:min(360px, 86vw); aspect-ratio:16/10; max-width:100%;
+  background:var(--areia); border-radius:6px; cursor:pointer; border:0; padding:0;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.08) inset;
+  animation:boiar 5s ease-in-out infinite; perspective:900px;
+}
+.envelope:focus-visible{outline:3px solid var(--lua); outline-offset:6px}
+.envelope .dobra-baixo{position:absolute; inset:0; clip-path:polygon(0 100%, 50% 48%, 100% 100%); background:#e9d7b8; border-radius:0 0 6px 6px}
+.envelope .dobra-lados{position:absolute; inset:0; clip-path:polygon(0 0, 50% 55%, 0 100%, 100% 100%, 50% 55%, 100% 0, 100% 100%, 0 100%); background:#efdfc2}
+.envelope .aba{position:absolute; inset:0 0 auto 0; height:60%; background:#e4cfac; clip-path:polygon(0 0, 100% 0, 50% 100%); transform-origin:top; transition:transform .8s cubic-bezier(.6,.1,.3,1)}
+.envelope .selo{
+  position:absolute; left:50%; top:52%; width:64px; height:64px; transform:translate(-50%,-50%);
+  border-radius:50%; background:radial-gradient(circle at 35% 30%, #ee8471, var(--coral) 45%, var(--coral-escuro) 100%);
+  display:grid; place-items:center; box-shadow:0 4px 10px rgba(0,0,0,.35); transition:transform .5s, opacity .5s
+}
+.envelope .selo svg{width:28px; height:28px}
+.envelope .destino{position:absolute; left:0; right:0; bottom:12%; text-align:center; font-family:var(--f-mao); color:var(--tinta-suave); font-size:1.05rem}
+.envelope.aberto{animation:none; cursor:default}
+.envelope.aberto .aba{transform:rotateX(180deg)}
+.envelope.aberto .selo{transform:translate(-50%,-50%) scale(.2); opacity:0}
+.dica{font-family:var(--f-mao); color:var(--lua); font-size:1.1rem; opacity:.85; animation:pulsar 2.4s ease-in-out infinite}
+@keyframes boiar{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
+@keyframes pulsar{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ---------- Carta ---------- */
+.carta{
+  width:100%; background:var(--papel); color:var(--tinta); border-radius:4px;
+  padding:clamp(28px, 6vw, 56px) clamp(22px, 6vw, 56px);
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.7);
+  background-image:repeating-linear-gradient(transparent 0 33px, rgba(80,110,140,.12) 33px 34px);
+  background-position:0 18px;
+  transform-origin:top center; animation:subir 1.1s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes subir{from{transform:translateY(60px) scale(.96); opacity:0}to{transform:none; opacity:1}}
+.carta .data{font-family:var(--f-mao); color:var(--tinta-suave); text-align:right; font-size:1rem}
+.carta h2{font-family:var(--f-display); font-style:italic; font-weight:400; font-size:clamp(1.8rem, 6vw, 2.4rem); margin:.4em 0 .6em; color:var(--coral-escuro)}
+.carta p{margin:0 0 1.1em; font-size:1.12rem; line-height:34px; max-width:62ch}
+.carta p.revela{opacity:0; transform:translateY(8px); transition:opacity 1s ease, transform 1s ease}
+.carta p.revela.on{opacity:1; transform:none}
+.assinatura{font-family:var(--f-mao); font-size:1.6rem; color:var(--coral-escuro); text-align:right; margin-top:.4em}
+
+/* ---------- Garrafas ---------- */
+.secao{width:100%; display:flex; flex-direction:column; gap:16px; align-items:center; text-align:center}
+.secao h3{font-family:var(--f-display); font-weight:300; font-size:1.7rem; margin:0; color:var(--areia); text-wrap:balance}
+.secao .sub{margin:0; color:var(--espuma); opacity:.75; font-size:1rem}
+.garrafas{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; width:100%}
+@media (max-width:520px){.garrafas{grid-template-columns:repeat(2, 1fr)}}
+.garrafa{
+  background:none; border:0; cursor:pointer; padding:6px; color:inherit; border-radius:12px;
+  display:flex; flex-direction:column; align-items:center; gap:6px; font:inherit;
+}
+.garrafa:focus-visible{outline:2px solid var(--lua); outline-offset:2px}
+.garrafa svg{width:52px; height:84px; animation:boiar 4s ease-in-out infinite; transition:transform .3s}
+.garrafa:nth-child(2) svg{animation-delay:-1s}.garrafa:nth-child(3) svg{animation-delay:-2s}.garrafa:nth-child(4) svg{animation-delay:-3s}
+.garrafa:hover svg{transform:scale(1.08)}
+.garrafa.lida{opacity:.45}
+.garrafa span{font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; opacity:.7}
+.bilhete{
+  width:100%; min-height:96px; background:var(--areia); color:var(--tinta); border-radius:3px;
+  padding:18px 22px; font-family:var(--f-mao); font-size:1.35rem; line-height:1.5;
+  display:flex; align-items:center; justify-content:center; transform:rotate(-1deg);
+  box-shadow:0 20px 40px -20px rgba(0,0,0,.6);
+}
+.bilhete.novo{animation:desenrolar .6s ease}
+@keyframes desenrolar{from{transform:rotate(-1deg) scaleY(.2); opacity:0}to{transform:rotate(-1deg) scaleY(1); opacity:1}}
+
+/* ---------- Pergunta ---------- */
+.pergunta{position:relative; min-height:200px}
+.botoes{display:flex; gap:16px; justify-content:center; flex-wrap:wrap; position:relative; width:100%; min-height:70px}
+.btn{
+  font-family:var(--f-display); font-size:1.15rem; border-radius:999px; padding:12px 30px; cursor:pointer;
+  border:1.5px solid var(--areia); background:transparent; color:var(--areia); transition:transform .2s, background .2s;
+}
+.btn:focus-visible{outline:3px solid var(--lua); outline-offset:3px}
+.btn.sim{background:var(--coral); border-color:var(--coral); color:#fff8ef}
+.btn.sim:hover{transform:scale(1.06)}
+.btn.nao{position:relative; transition:left .25s ease, top .25s ease}
+.resposta{font-family:var(--f-mao); color:var(--lua); font-size:1.6rem}
+
+/* ---------- Player ---------- */
+.player{
+  position:fixed; z-index:5; right:calc(16px + env(safe-area-inset-right, 0px)); bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  display:flex; align-items:center; gap:10px; background:rgba(8,22,38,.78); backdrop-filter:blur(8px);
+  border:1px solid rgba(207,230,238,.2); border-radius:999px; padding:8px 14px 8px 8px; max-width:calc(100vw - 32px);
+}
+.player button{width:40px; height:40px; border-radius:50%; border:0; background:var(--coral); color:#fff; cursor:pointer; display:grid; place-items:center; flex:none}
+.player button:focus-visible{outline:2px solid var(--lua); outline-offset:2px}
+.player .info{display:flex; flex-direction:column; line-height:1.2; min-width:0}
+.player .info b{font-family:var(--f-display); font-weight:600; font-size:.9rem; color:var(--areia); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.player .info small{font-size:.75rem; opacity:.7}
+.player .info a{color:var(--lua); font-size:.75rem}
+.barras{display:flex; gap:2px; align-items:flex-end; height:14px}
+.barras i{width:3px; background:var(--lua); height:30%; border-radius:1px}
+.tocando .barras i{animation:barra .9s ease-in-out infinite}
+.barras i:nth-child(2){animation-delay:-.3s}.barras i:nth-child(3){animation-delay:-.6s}
+@keyframes barra{0%,100%{height:25%}50%{height:100%}}
+
+.coracao{position:fixed; z-index:4; pointer-events:none; font-size:22px; color:var(--coral); animation:flutuar 1.8s ease-out forwards}
+@keyframes flutuar{to{transform:translate(var(--dx), -140px) scale(1.4); opacity:0}}
+
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}.carta p.revela{opacity:1; transform:none}}
+</style>
+
+</head>
+<body>
+<canvas id="ceu"></canvas>
+<canvas id="ondas"></canvas>
+
+<main>
+  <header class="abertura">
+    <span class="sobre">chegou uma carta pra você</span>
+    <h1>Onde o meu mar <em>encontra</em> o seu</h1>
+  </header>
+
+  <div class="envelope-wrap" id="envelopeWrap">
+    <button class="envelope" id="envelope" aria-label="Abrir a carta">
+      <div class="dobra-lados"></div>
+      <div class="dobra-baixo"></div>
+      <div class="aba"></div>
+      <div class="selo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="#fff4e8"><path d="M12 21s-7.5-4.6-9.5-9.3C1.1 8.4 3.2 5 6.6 5c2 0 3.4 1.1 4.4 2.5C12 6.1 13.4 5 15.4 5c3.4 0 5.5 3.4 4.1 6.7C19.5 16.4 12 21 12 21z"/></svg>
+      </div>
+      <div class="destino">para a minha princesa Ana</div>
+    </button>
+    <span class="dica" id="dica">toque no selo para abrir (com o som ligado)</span>
+  </div>
+
+  <article class="carta" id="carta" hidden>
+    <div class="data" id="data"></div>
+    <h2>Minha princesa Ana,</h2>
+    <p class="revela">Eu sempre achei bonito o lugar onde duas águas se encontram. Elas chegam de caminhos diferentes, com cores diferentes, e mesmo assim correm juntas. Foi isso que eu senti quando você entrou na minha vida.</p>
+    <p class="revela">Antes de você, meus dias tinham maré baixa e maré alta, mas pouca direção. Hoje, quando a vida aperta, é no seu abraço que eu ancoro. Quando está tudo bem, é com você que eu quero dividir.</p>
+    <p class="revela">Eu amo o seu riso fora de hora, o jeito que você me olha quando acha que eu não estou vendo, e a calma que a sua voz traz pra mim. Amo até as nossas pequenas brigas, porque depois delas a gente sempre volta a ser um só.</p>
+    <p class="revela">Não sei prometer que o mar vai estar sempre calmo. Mas prometo atravessar cada onda do seu lado, segurando a sua mão, escolhendo você todos os dias.</p>
+    <p class="revela">Obrigado por ser o meu encontro. Eu te amo mais do que cabe nessa carta.</p>
+    <div class="assinatura">Seu, pra sempre ♥</div>
+  </article>
+
+  <section class="secao" id="secGarrafas" hidden>
+    <h3>Mensagens que o mar trouxe</h3>
+    <p class="sub">Cada garrafa guarda um motivo. Abre todas.</p>
+    <div class="garrafas" id="garrafas"></div>
+    <div class="bilhete" id="bilhete">escolha uma garrafa…</div>
+  </section>
+
+  <section class="secao pergunta" id="secPergunta" hidden>
+    <h3>Você aceita navegar comigo pela vida inteira?</h3>
+    <div class="botoes" id="botoes">
+      <button class="btn sim" id="btnSim">Sim, aceito</button>
+      <button class="btn nao" id="btnNao">Não</button>
+    </div>
+    <div class="resposta" id="resposta" hidden></div>
+  </section>
+</main>
+
+<div class="player" id="player">
+  <button id="playBtn" aria-label="Tocar música">
+    <svg id="icPlay" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>
+    <svg id="icPause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" hidden><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+  </button>
+  <div class="info">
+    <b>Encontro das Marés</b>
+    <small>Pedro Valença</small>
+    <a id="linkMusica" hidden href="https://open.spotify.com/search/Encontro%20das%20Mar%C3%A9s%20Pedro%20Valen%C3%A7a" target="_blank" rel="noopener">ouvir no Spotify ↗</a>
+  </div>
+  <div class="barras" aria-hidden="true"><i></i><i></i><i></i></div>
+</div>
+
+<audio id="musica" src="musica.mp3" loop preload="auto"></audio>
+
+<script>
+(function(){
+  const reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- data ---------- */
+  const d = new Date();
+  document.getElementById('data').textContent = d.toLocaleDateString('pt-BR', {day:'numeric', month:'long', year:'numeric'});
+
+  /* ---------- música ---------- */
+  const audio = document.getElementById('musica');
+  const player = document.getElementById('player');
+  const playBtn = document.getElementById('playBtn');
+  const icPlay = document.getElementById('icPlay'), icPause = document.getElementById('icPause');
+  const link = document.getElementById('linkMusica');
+  let semArquivo = false;
+  audio.addEventListener('error', () => { semArquivo = true; link.hidden = false; });
+  function estado(tocando){
+    player.classList.toggle('tocando', tocando);
+    icPlay.hidden = tocando; icPause.hidden = !tocando;
+    playBtn.setAttribute('aria-label', tocando ? 'Pausar música' : 'Tocar música');
+  }
+  let pausadoPorEla = false;
+  function tocar(){
+    if (semArquivo) { link.hidden = false; return Promise.resolve(false); }
+    if (!audio.paused) { estado(true); return Promise.resolve(true); }
+    audio.volume = 0;
+    return audio.play().then(() => {
+      estado(true);
+      let v = 0; const t = setInterval(() => { v = Math.min(.8, v + .05); audio.volume = v; if (v >= .8) clearInterval(t); }, 120);
+      return true;
+    }).catch(() => { estado(false); return false; });
+  }
+  playBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (audio.paused) { pausadoPorEla = false; tocar(); } else { pausadoPorEla = true; audio.pause(); estado(false); }
+  });
+  /* toca assim que o site abre; se o navegador bloquear, começa no primeiro toque, clique ou tecla */
+  function primeiroToque(e){ if (!pausadoPorEla && !(e.target && e.target.closest && e.target.closest('#playBtn'))) tocar(); }
+  tocar().then(ok => {
+    if (ok) return;
+    ['pointerdown','touchstart','keydown'].forEach(ev => document.addEventListener(ev, primeiroToque, {once:true, capture:true}));
+  });
+
+  /* ---------- abrir envelope ---------- */
+  const env = document.getElementById('envelope');
+  env.addEventListener('click', () => {
+    if (env.classList.contains('aberto')) return;
+    env.classList.add('aberto');
+    document.getElementById('dica').hidden = true;
+    if (!pausadoPorEla) tocar();
+    chuva(14, innerWidth/2, innerHeight/2);
+    setTimeout(() => {
+      document.getElementById('envelopeWrap').hidden = true;
+      const carta = document.getElementById('carta');
+      carta.hidden = false;
+      document.getElementById('secGarrafas').hidden = false;
+      document.getElementById('secPergunta').hidden = false;
+      carta.scrollIntoView({behavior: reduz ? 'auto' : 'smooth', block:'start'});
+      const ps = carta.querySelectorAll('.revela');
+      ps.forEach((p, i) => setTimeout(() => p.classList.add('on'), reduz ? 0 : 500 + i * 1400));
+    }, reduz ? 0 : 900);
+  });
+
+  /* ---------- garrafas ---------- */
+  const motivos = [
+    'Porque o seu abraço é o meu lugar favorito no mundo.',
+    'Porque você me faz querer ser alguém melhor todos os dias.',
+    'Porque até o silêncio com você é bom.',
+    'Porque com você, qualquer lugar vira casa.',
+    'Porque o seu sorriso conserta o meu dia inteiro.',
+    'Porque você acredita em mim quando nem eu acredito.',
+    'Porque eu ainda fico bobo quando você chega.',
+    'Porque é você. Sempre foi você.'
+  ];
+  const gWrap = document.getElementById('garrafas');
+  const bilhete = document.getElementById('bilhete');
+  const coresVidro = ['#7fb7a8','#8fb3cf','#a8c39a','#b9a7cf','#7fb7a8','#cfb38f','#8fb3cf','#e0a39a'];
+  motivos.forEach((m, i) => {
+    const b = document.createElement('button');
+    b.className = 'garrafa'; b.id = 'garrafa-' + i;
+    b.setAttribute('aria-label', 'Abrir garrafa ' + (i+1));
+    b.innerHTML = `<svg viewBox="0 0 40 70" aria-hidden="true">
+      <rect x="15" y="2" width="10" height="7" rx="2" fill="#9a6b45"/>
+      <path d="M16 9h8v8c0 2 8 6 8 14v32a5 5 0 0 1-5 5H13a5 5 0 0 1-5-5V31c0-8 8-12 8-14z" fill="${coresVidro[i]}" fill-opacity=".55" stroke="#cfe6ee" stroke-opacity=".6"/>
+      <rect x="14" y="36" width="12" height="18" rx="1.5" fill="#f3e6cf" transform="rotate(-8 20 45)"/>
+      <path d="M12 30q2-6 4-8" stroke="#fff" stroke-opacity=".5" stroke-width="1.5" fill="none"/></svg><span>nº ${i+1}</span>`;
+    b.addEventListener('click', (e) => {
+      bilhete.textContent = m;
+      bilhete.classList.remove('novo'); void bilhete.offsetWidth; bilhete.classList.add('novo');
+      b.classList.add('lida');
+      chuva(5, e.clientX, e.clientY);
+    });
+    gWrap.appendChild(b);
+  });
+
+  /* ---------- pergunta ---------- */
+  const nao = document.getElementById('btnNao');
+  const frasesNao = ['Não', 'Tem certeza?', 'Pensa bem…', 'Errou o botão', 'Impossível', 'Tenta o outro'];
+  let fugas = 0;
+  function fugir(){
+    const area = document.getElementById('botoes').getBoundingClientRect();
+    const maxX = Math.max(0, area.width - nao.offsetWidth) / 2;
+    nao.style.left = ((Math.random() * 2 - 1) * maxX) + 'px';
+    nao.style.top = ((Math.random() * 2 - 1) * 40) + 'px';
+    fugas++; nao.textContent = frasesNao[fugas % frasesNao.length];
+    const sim = document.getElementById('btnSim');
+    sim.style.transform = `scale(${Math.min(1.6, 1 + fugas * .08)})`;
+  }
+  nao.addEventListener('mouseenter', fugir);
+  nao.addEventListener('click', (e) => { e.preventDefault(); fugir(); });
+  document.getElementById('btnSim').addEventListener('click', () => {
+    document.getElementById('botoes').hidden = true;
+    const r = document.getElementById('resposta');
+    r.hidden = false; r.textContent = 'Eu sabia. Te amo, pra sempre ♥';
+    for (let k = 0; k < 4; k++) setTimeout(() => chuva(14, Math.random()*innerWidth, innerHeight*0.7), k * 300);
+  });
+
+  /* ---------- corações ao tocar ---------- */
+  function chuva(n, x, y){
+    if (reduz) return;
+    for (let i = 0; i < n; i++){
+      const h = document.createElement('span');
+      h.className = 'coracao'; h.textContent = '♥';
+      h.style.left = (x + (Math.random()*60-30)) + 'px';
+      h.style.top = (y + (Math.random()*30-15)) + 'px';
+      h.style.setProperty('--dx', (Math.random()*120-60) + 'px');
+      h.style.fontSize = (14 + Math.random()*18) + 'px';
+      h.style.animationDelay = (Math.random()*.4) + 's';
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 2400);
+    }
+  }
+  document.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button, a')) return;
+    chuva(3, e.clientX, e.clientY);
+  });
+
+  /* ---------- céu e ondas ---------- */
+  const ceu = document.getElementById('ceu'), cx = ceu.getContext('2d');
+  const ondas = document.getElementById('ondas'), ox = ondas.getContext('2d');
+  let W, H, estrelas = [];
+  function tamanho(){
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight;
+    [ceu, ondas].forEach(c => { c.width = W*dpr; c.height = H*dpr; c.getContext('2d').setTransform(dpr,0,0,dpr,0,0); });
+    estrelas = Array.from({length: Math.round(W*H/9000)}, () => ({x:Math.random()*W, y:Math.random()*H*0.7, r:Math.random()*1.2+.2, f:Math.random()*Math.PI*2}));
+  }
+  tamanho(); addEventListener('resize', tamanho);
+  function quadro(t){
+    cx.clearRect(0,0,W,H);
+    // lua
+    const lx = W*0.82, ly = Math.min(110, H*0.14);
+    const g = cx.createRadialGradient(lx, ly, 0, lx, ly, 90);
+    g.addColorStop(0, 'rgba(246,231,184,.35)'); g.addColorStop(1, 'rgba(246,231,184,0)');
+    cx.fillStyle = g; cx.beginPath(); cx.arc(lx, ly, 90, 0, Math.PI*2); cx.fill();
+    cx.fillStyle = '#f6e7b8'; cx.beginPath(); cx.arc(lx, ly, 22, 0, Math.PI*2); cx.fill();
+    estrelas.forEach(s => {
+      cx.globalAlpha = .4 + .6*Math.abs(Math.sin(t/1400 + s.f));
+      cx.fillStyle = '#cfe6ee'; cx.beginPath(); cx.arc(s.x, s.y, s.r, 0, Math.PI*2); cx.fill();
+    });
+    cx.globalAlpha = 1;
+    // duas marés que se encontram
+    ox.clearRect(0,0,W,H);
+    const camadas = [
+      {cor:'rgba(56,120,150,.35)', amp:14, base:.80, vel:1/1800, k:.010, dir:1},
+      {cor:'rgba(217,96,76,.22)',  amp:12, base:.84, vel:1/1500, k:.013, dir:-1},
+      {cor:'rgba(20,52,77,.9)',    amp:10, base:.89, vel:1/2200, k:.008, dir:1}
+    ];
+    camadas.forEach(c => {
+      ox.fillStyle = c.cor; ox.beginPath(); ox.moveTo(0, H);
+      for (let x = 0; x <= W; x += 8){
+        const y = H*c.base + Math.sin(x*c.k + c.dir*t*c.vel)*c.amp + Math.sin(x*c.k*2.3 - t*c.vel*1.3)*c.amp*.35;
+        ox.lineTo(x, y);
+      }
+      ox.lineTo(W, H); ox.closePath(); ox.fill();
+    });
+    if (!reduz) requestAnimationFrame(quadro);
+  }
+  requestAnimationFrame(quadro);
+})();
+</script>
+
+</body>
+</html>
